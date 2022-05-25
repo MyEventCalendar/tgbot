@@ -1,7 +1,7 @@
 """Работа с API методами"""
 import json
 import urllib3
-from .local_settings import API_URL
+from . settings import API_URL
 
 http = urllib3.PoolManager()
 

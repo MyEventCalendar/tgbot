@@ -55,7 +55,7 @@ async def load_start_data(callback_query: CallbackQuery, callback_data, state: F
         async with state.proxy() as data:
             data['start_time'] = f'{date.strftime("%Y-%m-%d")}'
         await FSMClient.next()
-        await callback_query.message.answer(messages.ADD_EVENT_START_DATE)
+        await callback_query.message.answer(messages.ADD_EVENT_START_TIME)
 
 
 @dp.message_handler(state=FSMClient.start_time)
@@ -75,7 +75,7 @@ async def load_end_data(callback_query: CallbackQuery, callback_data, state: FSM
         async with state.proxy() as data:
             data['end_time'] = f'{date.strftime("%Y-%m-%d")}'
         await FSMClient.next()
-        await callback_query.message.answer(messages.ADD_EVENT_END_DATE)
+        await callback_query.message.answer(messages.ADD_EVENT_END_TIME)
 
 
 @dp.message_handler(state=FSMClient.end_time)
