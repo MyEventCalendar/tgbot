@@ -1,21 +1,28 @@
-# EventCalendarBot
+# tgbot
 
-### build docker image
+
+### Create virtual environment
 ```shell
-docker build . -t event-calendar-bot
+python3 -m venv env
 ```
 
-### create env.file with secrets
+### Activate virtual environment
 ```shell
-cat << EOF > file.env
-API_KEY=YOUR_API_KEY
-API_URL=YOUR_API_URL
-EOF
+. ./env/bin/activate
 ```
 
-### start docker container
+### Install packages from requirements.txt
 ```shell
-docker run -d --env-file file.env event-calendar-bot
+pip install -r requirements.txt
+```
 
+### Export environment variables
+```shell
+export API_KEY=YOUR_API_KEY API_URL=YOUR_API_URL
+```
+
+### Start main.py
+```shell
+python main.py 
 ```
 
