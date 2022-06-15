@@ -11,6 +11,8 @@ from aiogram_calendar import simple_cal_callback, SimpleCalendar
 Calendar1 = SimpleCalendar
 Calendar2 = SimpleCalendar
 
+TIME_REGEXP = r"[0-2][0-9]:[0-6][0-9]"
+
 
 class FSMClient(StatesGroup):
     """Структура состояний"""
@@ -58,13 +60,22 @@ async def load_start_data(callback_query: CallbackQuery, callback_data, state: F
         await callback_query.message.answer(messages.ADD_EVENT_START_TIME)
 
 
-@dp.message_handler(state=FSMClient.start_time)
+@dp.message_handler(state=FSMClient.start_time, regexp=TIME_REGEXP)
 async def load_start_time(message: types.Message, state: FSMContext):
-    """Ловит и запоминает время, возвращает календарь для выбора даты окончания события"""
+    """Ловит и запоминает время, при условии совпадения формата,
+     возвращает календарь для выбора даты окончания события"""
     async with state.proxy() as data:
         data['start_time'] += f' {message.text}'
     await FSMClient.next()
     await message.answer(messages.ADD_EVENT_END_DATE, reply_markup=await Calendar2().start_calendar())
+
+
+@dp.message_handler(state=FSMClient.start_time)
+async def load_incorrect_start_time(message: types.Message, state: FSMContext):
+    """Механизм конечных автомаов завершается,
+     в случае введения некорректного формата времени"""
+    await message.reply(messages.TIME_WAS_INCORRECT)
+    await state.finish()
 
 
 @dp.callback_query_handler(simple_cal_callback.filter(), state=FSMClient.end_date)
@@ -78,11 +89,23 @@ async def load_end_data(callback_query: CallbackQuery, callback_data, state: FSM
         await callback_query.message.answer(messages.ADD_EVENT_END_TIME)
 
 
-@dp.message_handler(state=FSMClient.end_time)
+@dp.message_handler(state=FSMClient.end_time, regexp=TIME_REGEXP)
 async def load_end_time(message: types.Message, state: FSMContext):
-    """Ловит и запоминает время, реализует метод PUT, возвращает ID события"""
+    """Ловит и запоминает время, при условии совпадения формата,
+     реализует метод POST, возвращает ID события"""
     async with state.proxy() as data:
         data['end_time'] += f' {message.text}'
-        res = API_Metods().post_event(data.items())
-        await message.reply(f"Событие добавлено ID:{res['pk']}")
+        try:
+            res = API_Metods().post_event(data.items())
+            await message.reply(f"Событие добавлено ID:{res['pk']}")
+        except Exception:
+            await message.reply(messages.API_SERVICE_ERROR)
+    await state.finish()
+
+
+@dp.message_handler(state=FSMClient.end_time)
+async def load_incorrect_start_time(message: types.Message, state: FSMContext):
+    """Механизм конечных автомаов завершается,
+     в случае введения некорректного формата времени"""
+    await message.reply(messages.TIME_WAS_INCORRECT)
     await state.finish()

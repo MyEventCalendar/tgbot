@@ -24,34 +24,38 @@ async def change_event(message: types.Message):
 
 @dp.message_handler(state=FSMChange.id)
 async def load_id(message: types.Message, state: FSMContext):
+    """Посредством инлйн клавиатуры запрашивает у пользователя тип изменений"""
     async with state.proxy() as data:
         data['pk'] = message.text
     await FSMChange.next()
-    await message.reply(data)
     await message.reply("Выберите пункт:", reply_markup=inline_kb)
 
 
 @dp.callback_query_handler(lambda c: c.data in ['name', 'description',
                                                 'start_time', 'end_time'], state=FSMChange.poll)
 async def button_click_call_back(callback_query: types.CallbackQuery, state: FSMContext):
+    """Ловит callback нажатой кнопки, запрашвает изменения у пользователя"""
     answer = callback_query.data
     async with state.proxy() as data:
         data[answer] = ''
         await FSMChange.next()
-        await callback_query.message.answer(data)
     if answer == 'name' or answer == 'description':
-        await callback_query.message.answer("Введите изменения")
+        await callback_query.message.answer(messages.CHANGE_TEXT)
     elif answer == 'start_time' or answer == 'end_time':
-        await callback_query.message.answer("Введите новые дату и время в формате YYYY-MM-DD HH:MM")
+        await callback_query.message.answer(messages.ADD_CHANGE_EVENT_TIME)
 
 
 @dp.message_handler(state=FSMChange.change)
 async def load_end_time(message: types.Message, state: FSMContext):
+    """Ловит изменения, реализует метод PUT, возвращает ID события"""
     async with state.proxy() as data:
         key = list(data.keys())[-1]
         data[key] += f'{message.text}'
-        res = API_Metods().put_change_event(data['pk'], data.items())
-        await message.reply(f"Событие ID:{res['pk']} успешно изменено")
+        try:
+            res = API_Metods().put_change_event(data['pk'], data.items())
+            await message.reply(f"Событие ID:{res['pk']} успешно изменено")
+        except Exception:
+            await message.reply(messages.API_SERVICE_ERROR)
     await state.finish()
 
 
