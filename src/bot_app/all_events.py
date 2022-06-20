@@ -11,6 +11,7 @@ LC_MAP = {
     "description": "Описание",
     "start_time": "Начало",
     "end_time": "Окончание",
+    "hidden": "Признак скрытия"
 }
 
 

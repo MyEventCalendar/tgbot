@@ -18,7 +18,7 @@ class API_Metods():
 
     def get_actual_events(self):
         """Get-запрос, возвращает список всех актуальных событий хранящихся в БД"""
-        response = http.request("GET", f"{API_URL}/events", fields={"actual": "true"})
+        response = http.request("GET", f"{API_URL}/events")
         self.__response_data__ = response.data
         return self.__parse_data__()
 
