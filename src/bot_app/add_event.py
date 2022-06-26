@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from .app import dp
 from . import messages
-from .data_fetcher import API_Metods
+from .data_fetcher import ApiController
 from aiogram.types import CallbackQuery
 from aiogram_calendar import simple_cal_callback, SimpleCalendar
 
@@ -91,12 +91,16 @@ async def load_end_data(callback_query: CallbackQuery, callback_data, state: FSM
 
 @dp.message_handler(state=FSMClient.end_time, regexp=TIME_REGEXP)
 async def load_end_time(message: types.Message, state: FSMContext):
+    telegram_id = message.from_user.id
+    password = 12345678
+    api = ApiController()
+    api.make_headers(telegram_id, password)
     """Ловит и запоминает время, при условии совпадения формата,
      реализует метод POST, возвращает ID события"""
     async with state.proxy() as data:
         data['end_time'] += f' {message.text}'
         try:
-            res = API_Metods().post_event(data.items())
+            res = api.post_event(data.items())
             await message.reply(f"Событие добавлено ID:{res['pk']}")
         except Exception:
             await message.reply(messages.API_SERVICE_ERROR)

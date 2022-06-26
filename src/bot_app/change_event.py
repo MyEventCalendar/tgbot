@@ -3,7 +3,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from .app import dp
-from .data_fetcher import API_Metods
+from .data_fetcher import ApiController
 from . import messages
 from .keyboards import inline_kb
 
@@ -48,11 +48,15 @@ async def button_click_call_back(callback_query: types.CallbackQuery, state: FSM
 @dp.message_handler(state=FSMChange.change)
 async def load_end_time(message: types.Message, state: FSMContext):
     """Ловит изменения, реализует метод PUT, возвращает ID события"""
+    telegram_id = message.from_user.id
+    password = 12345678
+    api = ApiController()
+    api.make_headers(telegram_id, password)
     async with state.proxy() as data:
         key = list(data.keys())[-1]
         data[key] += f'{message.text}'
         try:
-            res = API_Metods().put_change_event(data['pk'], data.items())
+            res = api.put_change_event(data['pk'], data.items())
             await message.reply(f"Событие ID:{res['pk']} успешно изменено")
         except Exception:
             await message.reply(messages.API_SERVICE_ERROR)

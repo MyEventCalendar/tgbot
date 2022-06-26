@@ -52,6 +52,10 @@ ADD_CHANGE_EVENT_TIME = '''
 Введите новые дату и время в формате YYYY-MM-DD HH:MM
 '''
 
-CHANGE_TEXT= '''
+CHANGE_TEXT = '''
 Введите изменения
+'''
+
+NO_ACTUAL_EVENTS = ''' 
+У вас нет актуальных событий! 
 '''
